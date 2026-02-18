@@ -16,6 +16,9 @@ I have successfully set up and started the Finagg Onboarding dashboard. Below is
     - **Logic**: Updated the export function to only include rows currently visible in the table.
     - **State Management**: Introduced `displayedData` in JS to synchronize the export with active filters.
 - **Application Rename**: The main file was renamed to `Adoption_Dashboard.py`. (Completed)
+- **Performance Optimization**:
+    - **Query Speed**: Optimized the SQL query by removing `DATE()` wrapping in filters, allowing MySQL to use indexes effectively.
+    - **Stability**: Switched the server to `debug=False` to prevent the "Address already in use" conflict caused by the Flask reloader.
 - **Table Visibility Fix**: Fixed JS ID mismatches (`detHead`, `detBody`) and added a total row count indicator. (Completed)
 - **Render Deployment Preparation**: Configuration files created. (Completed)
 - **Deployment Alternatives**: Researched and documented Railway vs. VPS.

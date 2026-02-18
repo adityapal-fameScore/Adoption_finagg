@@ -33,7 +33,7 @@ QUERY = (
     "FROM fa_aipd_details GROUP BY pan_no COLLATE utf8mb4_unicode_ci), "
     "WhatsappStatus AS ("
     "SELECT DISTINCT loanRequestId FROM cbs_prodn.nfs_whatsapp_user_sessions "
-    "WHERE DATE(created_on) BETWEEN %s AND %s AND loanRequestId IS NOT NULL), "
+    "WHERE created_on >= %s AND created_on < DATE_ADD(%s, INTERVAL 1 DAY) AND loanRequestId IS NOT NULL), "
     "BaseData AS ("
     "SELECT ffil.pan_no COLLATE utf8mb4_unicode_ci AS PAN, COALESCE(fo.org_name, ffil.enterprises_name) AS Firm_Name, "
     "tlrm.loan_request_id AS LOS_ID, CAST(AES_DECRYPT(tlrm.loan_request_no, 'Throttle Key') AS CHAR) AS LOS_Number, "
@@ -617,4 +617,4 @@ if __name__ == '__main__':
         print("ACTION REQUIRED: Please connect to OpenVPN using 'adityagcp.ovpn'")
     print("="*50 + "\n")
     
-    app.run(debug=True, host='0.0.0.0', port=8087)
+    app.run(debug=False, host='0.0.0.0', port=8087)
