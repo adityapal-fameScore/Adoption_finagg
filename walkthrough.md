@@ -20,6 +20,9 @@ I have successfully set up and started the Finagg Onboarding dashboard. Below is
     - **Logic**: Linked `ts_loan_request_master_log` with `ts_user_master` to fetch the latest activity.
     - **Decryption**: Applied `AES_DECRYPT` with the 'Throttle Key' to provide human-readable usernames (e.g., "Saumya123").
     - **UI**: Added a new column in the details table for real-time tracking.
+- **Dual Dashboard Setup**:
+    - **Instances**: Configured both `Adoption_Dashboard.py` (Port 8087) and `Adoption_Dashboard copy.py` (Port 8088) to run simultaneously.
+    - **Optimization**: Synchronized all performance-tuned SQL logic across both instances.
 - **Performance Optimization**:
     - **Query Speed**: Optimized the SQL query by removing `DATE()` wrapping in filters, allowing MySQL to use indexes effectively.
     - **Stability**: Switched the server to `debug=False` to prevent the "Address already in use" conflict caused by the Flask reloader.
