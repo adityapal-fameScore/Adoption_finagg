@@ -221,6 +221,7 @@ HTML_TEMPLATE = r"""
         let currentData = [];
         let displayedData = [];
         let activeFilters = {};
+        let currentSort = { col: null, dir: 'asc' };
         const COLUMNS = ['PAN', 'Firm_Name', 'LOS_ID', 'LOS_Created_Date', 'Invite_Date', 'LOS_Approval_Status', 'Sub_Status_Name', 'Program_Name', 'Program_Category', 'Anchor_Name', 'Relationship_Type', 'Invited_By', 'Sourced_By', 'AI_PD_Attempted', 'Answer_Attempted', 'Fame_Report_Present'];
 
         window.onload = () => {
@@ -362,17 +363,45 @@ HTML_TEMPLATE = r"""
         }
 
         function renderTable(data) {
-            document.getElementById('tbody').innerHTML = data.map(r => `
-                <tr>
-                    ${COLUMNS.map(c => {
-                        let val = r[c] || '-';
-                        let cls = '';
-                        if((c.includes('Attempted') || c.includes('Present')) && val === 'Yes') cls = 'status-yes';
-                        if((c.includes('Attempted') || c.includes('Present')) && val === 'No') cls = 'status-no';
-                        return `<td class="${cls}">${val}</td>`;
-                    }).join('')}
-                </tr>
-            `).join('');
+            const head = document.getElementById('detHead');
+            const body = document.getElementById('detBody');
+            
+            head.innerHTML = `<tr>${COLUMNS.map(c => {
+                let indicator = '';
+                if (currentSort.col === c) {
+                    indicator = currentSort.dir === 'asc' ? ' \u2191' : ' \u2193';
+                }
+                return `<th onclick="sortTable('${c}')" style="cursor:pointer; white-space:nowrap;">${c.replace(/_/g, ' ')}${indicator}</th>`;
+            }).join('')}</tr>`;
+            
+            body.innerHTML = data.map(row => `<tr>${COLUMNS.map(c => {
+                const val = row[c] || '-';
+                let cls = '';
+                if (val === 'Yes') cls = 'status-yes';
+                if (val === 'No') cls = 'status-no';
+                return `<td class="${cls}">${val}</td>`;
+            }).join('')}</tr>`).join('');
+            document.getElementById('detCount').innerText = data.length;
+        }
+
+        function sortTable(col) {
+            if (currentSort.col === col) {
+                currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.col = col;
+                currentSort.dir = 'asc';
+            }
+            
+            displayedData.sort((a, b) => {
+                let v1 = a[col] || '';
+                let v2 = b[col] || '';
+                
+                // Handle numeric/date strings if needed, but localeCompare is generally safe for these strings
+                let res = String(v1).localeCompare(String(v2), undefined, {numeric: true, sensitivity: 'base'});
+                return currentSort.dir === 'asc' ? res : -res;
+            });
+            
+            renderTable(displayedData);
         }
 
         function filterList(col, input) {

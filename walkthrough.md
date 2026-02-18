@@ -16,7 +16,10 @@ I have successfully set up and started the Finagg Onboarding dashboard. Below is
     - **Logic**: Updated the export function to only include rows currently visible in the table.
     - **State Management**: Introduced `displayedData` in JS to synchronize the export with active filters.
 - **Application Rename**: The main file was renamed to `Adoption_Dashboard.py`. (Completed)
-- **VPN Connectivity Integration**: Added connectivity guard and UI alerts. (Completed)
+- **Table Sorting (Asc/Desc)**:
+    - **UI**: Added clickable table headers with arrows (↑ ↓) to indicate sort direction.
+    - **Logic**: Implemented a `sortTable` function in JS that handles alphabetical, numeric, and date sorting.
+    - **Integration**: Sorting works seamlessly with the existing multi-column filters.
 - **Render Deployment Preparation**: Configuration files created. (Completed)
 - **Deployment Alternatives**: Researched and documented Railway vs. VPS.
 
