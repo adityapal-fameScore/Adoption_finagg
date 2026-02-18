@@ -63,16 +63,8 @@ QUERY = (
     "LEFT JOIN fa_program fp ON tlrm.program_id = fp.program_id "
     "LEFT JOIN fa_substatus_master fssm ON tlrm.substatus_id = fssm.id "
     "WHERE ffil.id IS NULL AND tlrm.created_on >= %s), "
-    "LatestLogs AS ("
-    "SELECT loan_request_id, created_by, "
-    "ROW_NUMBER() OVER (PARTITION BY loan_request_id ORDER BY log_id DESC) as log_rn "
-    "FROM ts_loan_request_master_log "
-    "WHERE loan_request_id IN (SELECT DISTINCT LOS_ID FROM BaseData WHERE LOS_ID IS NOT NULL)), "
-    "LastAccessed AS ("
-    "SELECT ll.loan_request_id, CAST(AES_DECRYPT(tum.user_Name, 'Throttle Key') AS CHAR) AS Last_Accessed_By "
-    "FROM LatestLogs ll JOIN ts_user_master tum ON ll.created_by = tum.user_Id WHERE ll.log_rn = 1), "
     "FinalRanking AS ("
-    "SELECT bd.*, frs.Fame_Report_Present, aps.AI_PD_Attempted, aps.Answer_Attempted, la.Last_Accessed_By, "
+    "SELECT bd.*, frs.Fame_Report_Present, aps.AI_PD_Attempted, aps.Answer_Attempted, "
     "MAX(CASE WHEN ws.loanRequestId IS NOT NULL THEN 1 ELSE 0 END) OVER (PARTITION BY bd.PAN) AS PAN_Has_Whatsapp, "
     "MAX(bd.Row_Invite_Date) OVER (PARTITION BY bd.PAN) AS Final_Invite_Date, "
     "FIRST_VALUE(bd.LOS_ID) OVER (PARTITION BY bd.PAN ORDER BY bd.LOS_Created_Date ASC) AS First_LOS_ID, "
@@ -82,8 +74,7 @@ QUERY = (
     "FROM BaseData bd "
     "LEFT JOIN FameReportStatus frs ON bd.PAN = frs.PAN "
     "LEFT JOIN AIPDStatus aps ON bd.PAN = aps.PAN "
-    "LEFT JOIN WhatsappStatus ws ON bd.LOS_ID = ws.loanRequestId "
-    "LEFT JOIN LastAccessed la ON bd.LOS_ID = la.loan_request_id) "
+    "LEFT JOIN WhatsappStatus ws ON bd.LOS_ID = ws.loanRequestId) "
     "SELECT *, "
     "CASE WHEN LOS_ID IS NULL THEN 'INVITE ONLY' WHEN LOS_ID = First_LOS_ID THEN 'PARENT' ELSE 'CHILD' END AS Relationship_Type, "
     "COALESCE(Inherited_Invited_By, 'System Generated') AS Invited_By, "
@@ -231,7 +222,7 @@ HTML_TEMPLATE = r"""
         let displayedData = [];
         let activeFilters = {};
         let currentSort = { col: null, dir: 'asc' };
-        const COLUMNS = ['PAN', 'Firm_Name', 'LOS_ID', 'LOS_Created_Date', 'Invite_Date', 'LOS_Approval_Status', 'Sub_Status_Name', 'Program_Name', 'Program_Category', 'Anchor_Name', 'Relationship_Type', 'Invited_By', 'Sourced_By', 'Last_Accessed_By', 'AI_PD_Attempted', 'Answer_Attempted', 'Fame_Report_Present'];
+        const COLUMNS = ['PAN', 'Firm_Name', 'LOS_ID', 'LOS_Created_Date', 'Invite_Date', 'LOS_Approval_Status', 'Sub_Status_Name', 'Program_Name', 'Program_Category', 'Anchor_Name', 'Relationship_Type', 'Invited_By', 'Sourced_By', 'AI_PD_Attempted', 'Answer_Attempted', 'Fame_Report_Present'];
 
         window.onload = () => {
             const today = new Date().toISOString().split('T')[0];

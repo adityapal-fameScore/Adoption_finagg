@@ -69,7 +69,7 @@ QUERY = (
     "FROM ts_loan_request_master_log "
     "WHERE loan_request_id IN (SELECT DISTINCT LOS_ID FROM BaseData WHERE LOS_ID IS NOT NULL)), "
     "LastAccessed AS ("
-    "SELECT ll.loan_request_id, CAST(AES_DECRYPT(tum.user_Name, 'Throttle Key') AS CHAR) AS Last_Accessed_By "
+    "SELECT ll.loan_request_id, COALESCE(CAST(AES_DECRYPT(tum.user_Name, 'Throttle Key') AS CHAR), '-') AS Last_Accessed_By "
     "FROM LatestLogs ll JOIN ts_user_master tum ON ll.created_by = tum.user_Id WHERE ll.log_rn = 1), "
     "FinalRanking AS ("
     "SELECT bd.*, frs.Fame_Report_Present, aps.AI_PD_Attempted, aps.Answer_Attempted, la.Last_Accessed_By, "
@@ -231,7 +231,7 @@ HTML_TEMPLATE = r"""
         let displayedData = [];
         let activeFilters = {};
         let currentSort = { col: null, dir: 'asc' };
-        const COLUMNS = ['PAN', 'Firm_Name', 'LOS_ID', 'LOS_Created_Date', 'Invite_Date', 'LOS_Approval_Status', 'Sub_Status_Name', 'Program_Name', 'Program_Category', 'Anchor_Name', 'Relationship_Type', 'Invited_By', 'Sourced_By', 'Last_Accessed_By', 'AI_PD_Attempted', 'Answer_Attempted', 'Fame_Report_Present'];
+        const COLUMNS = ['PAN', 'Firm_Name', 'LOS_ID', 'Last_Accessed_By', 'LOS_Created_Date', 'Invite_Date', 'LOS_Approval_Status', 'Sub_Status_Name', 'Program_Name', 'Program_Category', 'Anchor_Name', 'Relationship_Type', 'Invited_By', 'Sourced_By', 'AI_PD_Attempted', 'Answer_Attempted', 'Fame_Report_Present'];
 
         window.onload = () => {
             const today = new Date().toISOString().split('T')[0];
