@@ -159,9 +159,17 @@ HTML_TEMPLATE = r"""
         .status-yes { color: #10b981; font-weight: 600; }
         .status-no { color: #ef4444; font-weight: 600; }
 
+        .vpn-banner { display: none; background: #fee2e2; color: #991b1b; padding: 10px 20px; border-radius: 8px; border: 1px solid #fca5a5; margin-bottom: 20px; font-size: 13px; font-weight: 600; align-items: center; gap: 10px; }
+        .vpn-banner.active { display: flex; }
+        .vpn-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; }
+
     </style>
 </head>
 <body>
+    <div class="vpn-banner" id="vpnBanner">
+        <div class="vpn-dot"></div>
+        <span>Database Disconnected: Please ensure you are connected to OpenVPN using <code>adityagcp.ovpn</code>.</span>
+    </div>
     <div class="header">
         <div><h2>Finagg Onboarding</h2></div>
         <div class="controls">
@@ -237,6 +245,14 @@ HTML_TEMPLATE = r"""
                     body: JSON.stringify({start_date: document.getElementById('start').value, end_date: document.getElementById('end').value})
                 });
                 const data = await res.json();
+                
+                const vpnBanner = document.getElementById('vpnBanner');
+                if (data.db_connected === false) {
+                    vpnBanner.classList.add('active');
+                } else {
+                    vpnBanner.classList.remove('active');
+                }
+
                 renderCards(data.metrics.total);
             } catch(e) { console.error(e); } finally {
                 btn.disabled = false; spinner.style.display = 'none'; txt.innerText = 'Analyze';
@@ -405,6 +421,14 @@ def get_db_connection():
         return None
 
 
+def check_db_connectivity():
+    conn = get_db_connection()
+    if conn:
+        conn.close()
+        return True
+    return False
+
+
 def execute_query(query, params=None):
     conn = get_db_connection()
     if not conn: return None
@@ -432,10 +456,11 @@ def index():
 
 @app.route('/api/dashboard', methods=['POST'])
 def get_dashboard_data():
+    db_connected = check_db_connectivity()
     try:
         data = request.get_json()
         res = execute_query(QUERY, get_params(data['start_date'], data['end_date']))
-        if res is None: return jsonify({'error': 'DB Error'}), 500
+        if res is None: return jsonify({'metrics': {'total': {}}, 'db_connected': db_connected}), 200
 
         unique_pans = {k: set() for k in
                        ['onboarded', 'fresh_onboarding', 'fame_to_finagg', 'retail', 'sme', 'anchor', 'whatsapp', 'ai_pd', 'ai_pd_answered', 'fame']}
@@ -490,7 +515,7 @@ def get_dashboard_data():
             'ai_pd_answered': len(unique_pans['ai_pd_answered']),
             'fame_score': len(unique_pans['fame'])
         })
-        return jsonify({'metrics': {'total': metrics}})
+        return jsonify({'metrics': {'total': metrics}, 'db_connected': db_connected})
     except Exception as e:
         logger.error(f"Dash Error: {e}")
         return jsonify({'error': str(e)}), 500
@@ -554,4 +579,14 @@ def get_details():
 
 
 if __name__ == '__main__':
+    print("\n" + "="*50)
+    print("FINAGG ADOPTION DASHBOARD STARTUP")
+    print("="*50)
+    if check_db_connectivity():
+        print("DATABASE STATUS: CONNECTED \u2705")
+    else:
+        print("DATABASE STATUS: DISCONNECTED \u274C")
+        print("ACTION REQUIRED: Please connect to OpenVPN using 'adityagcp.ovpn'")
+    print("="*50 + "\n")
+    
     app.run(debug=True, host='0.0.0.0', port=8087)
