@@ -196,7 +196,7 @@ HTML_TEMPLATE = r"""
     <div class="details-section" id="details">
         <div class="section-overlay" id="tableLoader"><div class="big-spinner"></div></div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 id="detTitle" style="font-size: 18px; color: #1e293b;">Details View</h3>
+            <h3 id="detTitle" style="font-size: 18px; color: #1e293b;">Details View (Total: <span id="detCount">0</span>)</h3>
             <div style="display: flex; gap: 10px;">
                 <button class="btn" style="background:#f43f5e" onclick="resetFilters()">Reset Filters</button>
                 <button class="btn" style="background:#10b981" onclick="exportCSV()">Export CSV</button>
@@ -207,10 +207,10 @@ HTML_TEMPLATE = r"""
             <div class="scroll-wrapper" id="scrollWrapper">
                 <table>
                     <thead>
-                        <tr id="header-row"></tr>
+                        <tr id="detHead"></tr>
                         <tr id="filter-row"></tr>
                     </thead>
-                    <tbody id="tbody"></tbody>
+                    <tbody id="detBody"></tbody>
                 </table>
             </div>
         </div>
@@ -228,7 +228,6 @@ HTML_TEMPLATE = r"""
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('start').value = today;
             document.getElementById('end').value = today;
-            document.getElementById('header-row').innerHTML = COLUMNS.map(c => `<th>${c.replace(/_/g,' ')}</th>`).join('');
             document.getElementById('filter-row').innerHTML = COLUMNS.map(c => `<td><div class="filter-container" id="f-${c}"></div></td>`).join('');
             loadDash();
             setInterval(() => { if(document.getElementById('autoRefresh').checked) loadDash(); }, 300000);
